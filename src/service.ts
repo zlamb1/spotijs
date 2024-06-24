@@ -8,8 +8,6 @@ export interface ServiceInfo {
     scopes: AuthScope[],
     verify_uri: string,
     auth_uri: string,
-    on_verify?: () => void,
-    on_auth?: () => void,
 }
 
 export class APIService {
