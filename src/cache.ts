@@ -19,3 +19,18 @@ export class LocalStorageCache implements StorageCache {
         localStorage.removeItem(location);
     }
 }
+
+export class SessionStorageCache implements StorageCache {
+    hasItem(location: string) : boolean {
+        return this.getItem(location) != null; 
+    }
+    getItem(location: string) : string | null {
+        return sessionStorage.getItem(location); 
+    }
+    setItem(location: string, value: any) {
+        sessionStorage.setItem(location, value); 
+    }
+    removeItem(location: string) {
+        sessionStorage.removeItem(location);
+    }
+}
