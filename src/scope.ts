@@ -20,12 +20,7 @@ export enum AuthScope {
     UserLibraryModify = 'user-library-modify',
     UserLibraryRead = 'user-library-read',
     UserReadEmail = 'user-read-email',
-    UserReadPrivate = 'user-read-private',
-    UserSoaLink = 'user-soa-link',
-    UserSoaUnlink = 'user-soa-unlink',
-    SoaManageEntitlements = 'soa-manage-entitlements',
-    SoaManagePartner = 'soa-manage-partner',
-    SoaCreatePartner = 'soa-create-partner',
+    UserReadPrivate = 'user-read-private'
 }
 
 export namespace Scope {
@@ -37,15 +32,13 @@ export namespace Scope {
             let str = ''; 
             const keys = Object.keys(AuthScope);
             keys.forEach((key, index) => {
-                switch (key) {
-                    case AuthScope.All:
-                        break;
-                    default:
-                        str += key; 
-                }
-
-                if (index != keys.length - 1) {
-                    str += ' '; 
+                const val = (AuthScope as any)[key];
+                switch (val) {
+                    case AuthScope.All: break;
+                    case AuthScope.None: break;
+                    default: 
+                        str += val;
+                        if (index != keys.length - 1) str += ' '; 
                 }
             });
             return str;
@@ -59,6 +52,8 @@ export namespace Scope {
                 } else {
                     str += scope[i]; 
                 }
+
+                if (i != scope.length - 1) str += ' '; 
             }
 
             return str; 
