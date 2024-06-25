@@ -1,5 +1,6 @@
 import { SpArtist } from "./artist";
 import { SpImage } from "./image";
+import { SpTrack } from "./track";
 import { SpAlbumType, SpParse } from "./types";
 
 export class SpAlbum {
@@ -12,6 +13,7 @@ export class SpAlbum {
     // TODO: convert to using Date?
     release_date: string;
     artists: SpArtist[];
+    tracks?: SpTrack[];
     copyrights: any[];
     genres: string[]; 
     label: string;
@@ -27,6 +29,7 @@ export class SpAlbum {
         this.name = data.name;
         this.release_date = data.release_date; 
         this.artists = data.artists.map((artist: any) => new SpArtist(artist));
+        this.tracks = data.tracks?.map((track: any) => new SpTrack(track));
         this.copyrights = data.copyrights;
         this.genres = data.genres;
         this.label = data.label;

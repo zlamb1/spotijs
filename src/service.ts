@@ -2,7 +2,7 @@ import axios from 'axios';
 import { AuthScope } from './scope'
 import { StorageCache, LocalStorageCache } from './cache';
 import { AuthInfo, AuthToken, TOKEN_URL, TokenInfo, generateCodeVerifier, getStrippedURL, redirectToAuthFlow, requestAuthToken } from './token';
-import { APIProvider, AxiosProvider } from './query';
+import { APIProvider, AxiosConsumer, NetworkConsumer } from './provider';
 
 export interface ServiceInfo {
     client_id: string,
@@ -23,14 +23,15 @@ export class APIService {
     apiState: APIState = APIState.Pending;
     storageCache: StorageCache = new LocalStorageCache();
     authToken?: AuthToken = undefined; 
-    apiProvider: Partial<APIProvider>;
+
+    networkConsumer: NetworkConsumer = new AxiosConsumer(this);
+    apiProvider: APIProvider = new APIProvider(this.networkConsumer);
 
     private codeVerifierLocation = "spotijs_code_verifier";
     private authTokenLocation = 'spotijs_auth_token';
 
     constructor(service_info: ServiceInfo) {
         this.serviceInfo = service_info; 
-        this.apiProvider = new AxiosProvider(this);
         this.loadCachedToken(); 
     }
 
@@ -39,7 +40,7 @@ export class APIService {
         if (item) {
             this.authToken = JSON.parse(item) as AuthToken;
             const elapsed = Date.now() - this.authToken.timeAcquired;
-            if (Math.floor(elapsed) > this.authToken.expiresIn) {
+            if (Math.floor(elapsed / 1000) > this.authToken.expiresIn) {
                 this.refreshToken();
             }
         }

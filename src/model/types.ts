@@ -25,6 +25,14 @@ export enum SpAlbumType {
     Unknown = 'unknown'
 }
 
+export enum SpContextType {
+    Artist = 'artist',
+    Playlist = 'playlist',
+    Album = 'album',
+    Show = 'show',
+    Unknown = 'unknown'
+}
+
 export namespace SpParse {
     export function getItemType(type: string) : SpType {
         switch (type?.toLowerCase()) {
@@ -73,6 +81,21 @@ export namespace SpParse {
                 return SpAlbumType.Compilation;
             default:
                 return SpAlbumType.Unknown; 
+        }
+    }
+
+    export function getContextType(type: string) : SpContextType {
+        switch (type?.toLowerCase()) {
+            case 'artist':
+                return SpContextType.Artist;
+            case 'playlist':
+                return SpContextType.Playlist;
+            case 'album':
+                return SpContextType.Album;
+            case 'show':
+                return SpContextType.Show;
+            default:
+                return SpContextType.Unknown; 
         }
     }
 }
