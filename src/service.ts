@@ -2,6 +2,7 @@ import axios from 'axios';
 import { AuthScope } from './scope'
 import { StorageCache, LocalStorageCache } from './cache';
 import { AuthInfo, AuthToken, TOKEN_URL, TokenInfo, generateCodeVerifier, getStrippedURL, redirectToAuthFlow, requestAuthToken } from './token';
+import { APIProvider, AxiosProvider } from './query';
 
 export interface ServiceInfo {
     client_id: string,
@@ -10,16 +11,26 @@ export interface ServiceInfo {
     auth_uri: string,
 }
 
+export enum APIState {
+    InvalidClient = 'invalid_client',
+    Pending = 'pending',
+    Ready = 'ready',
+    Unknown = 'unknown',
+}
+
 export class APIService {
     serviceInfo: ServiceInfo;
+    apiState: APIState = APIState.Pending;
     storageCache: StorageCache = new LocalStorageCache();
     authToken?: AuthToken = undefined; 
+    apiProvider: Partial<APIProvider>;
 
     private codeVerifierLocation = "spotijs_code_verifier";
     private authTokenLocation = 'spotijs_auth_token';
 
     constructor(service_info: ServiceInfo) {
         this.serviceInfo = service_info; 
+        this.apiProvider = new AxiosProvider(this);
         this.loadCachedToken(); 
     }
 
@@ -51,8 +62,6 @@ export class APIService {
     }
 
     verifyService() {
-        const url = getStrippedURL();
-
         const code_verifier = this.storageCache.getItem(this.codeVerifierLocation); 
         this.storageCache.removeItem(this.codeVerifierLocation); 
 
@@ -73,6 +82,8 @@ export class APIService {
 
         requestAuthToken(token_info).then((res: any) => {
             this.updateToken(res.data);
+        }).catch(res => {
+            this.apiState = parseErrorState(res?.response);
         });
 
         return true; 
@@ -96,6 +107,8 @@ export class APIService {
             })
         }).then(res => {
             this.updateToken(res.data);
+        }).catch(res => {
+            this.apiState = parseErrorState(res?.response);
         });
     }
 
@@ -110,5 +123,16 @@ export class APIService {
         }
 
         this.storageCache.setItem(this.authTokenLocation, JSON.stringify(this.authToken));
+        this.apiState = APIState.Ready; 
     }
+}
+
+function parseErrorState(res: any) {
+    if (res?.status == 400) {
+        if (res?.data?.error == 'invalid_client') {
+            return APIState.InvalidClient; 
+        }
+    }
+
+    return APIState.Unknown;
 }
